@@ -1,18 +1,18 @@
 ---
-- name: Install Java (required for Jenkins)
-  amazon-linux-extras:
-    name: java-openjdk11
+- name: Install Java 11
+  yum:
+    name: java-11-amazon-corretto
     state: present
 
-- name: Add Jenkins repository
-  template:
-    src: jenkins.repo.j2
+- name: Add Jenkins repo
+  get_url:
+    url: https://pkg.jenkins.io/redhat-stable/jenkins.repo
     dest: /etc/yum.repos.d/jenkins.repo
 
 - name: Import Jenkins GPG key
   rpm_key:
-    state: present
     key: https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+    state: present
 
 - name: Install Jenkins
   yum:
@@ -31,11 +31,11 @@
     delay: 10
     timeout: 60
 
-- name: Show initial Jenkins admin password
+- name: Show initial admin password
   command: cat /var/lib/jenkins/secrets/initialAdminPassword
   register: jenkins_initial_password
   ignore_errors: yes
 
 - debug:
     msg: "Jenkins initial admin password: {{ jenkins_initial_password.stdout }}"
-
+...
