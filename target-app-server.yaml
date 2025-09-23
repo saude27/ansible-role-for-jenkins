@@ -1,4 +1,4 @@
-- hosts: jenkins-master
+- hosts: target-app-server
   become: yes
   roles:
     - target-app-server
