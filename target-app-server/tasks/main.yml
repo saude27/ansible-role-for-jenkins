@@ -1,4 +1,5 @@
 ---
+# Update package cache
 - name: Update package cache
   package:
     update_cache: yes
@@ -15,33 +16,52 @@
     name: virtualenv
     executable: pip3
 
+
 - name: Install Git
   package:
     name: git
     state: present
 
-# PostgreSQL installation
-- name: Install PostgreSQL packages (cross-platform)
-  package:
-    name: "{{ postgresql_packages }}"
-    state: present
-  vars:
-    postgresql_packages: >
-      {% if ansible_os_family == 'Debian' %}
-        postgresql, postgresql-contrib, libpq-dev
-      {% else %}
-        postgresql, postgresql-server, postgresql-contrib, postgresql-devel
-      {% endif %}
 
-# Initialize database (Amazon Linux)
-- name: Initialize PostgreSQL database (Amazon Linux only)
-  command: postgresql-setup initdb
+
+
+
+
+- name: Enable PostgreSQL module on Amazon Linux 2023
+  ansible.builtin.command: "dnf module enable -y postgresql:{{ postgres_version }}"
+  when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
+
+
+- name: Install PostgreSQL packages on Amazon Linux 2023
+  dnf:
+    name:
+      - postgresql
+      - postgresql-server
+      - postgresql-contrib
+      - postgresql-devel
+    state: present
+  when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
+
+# Install PostgreSQL (Amazon Linux 2 / RHEL / CentOS)
+- name: Install PostgreSQL packages on Amazon Linux 2 / RHEL / CentOS
+  yum:
+    name:
+      - postgresql
+      - postgresql-server
+      - postgresql-contrib
+      - postgresql-devel
+    state: present
+  when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2"
+
+# Initialize PostgreSQL database (Amazon Linux)
+- name: Initialize PostgreSQL database (Amazon Linux)
+  command: "/usr/bin/postgresql-setup --initdb"
   args:
     creates: /var/lib/pgsql/data/PG_VERSION
-  when: ansible_os_family == 'RedHat'
+  when: ansible_distribution == "Amazon"
 
-# Ensure PostgreSQL is running
-- name: Ensure PostgreSQL service is running
+# Ensure PostgreSQL service is running
+- name: Ensure PostgreSQL is running and enabled
   service:
     name: postgresql
     state: started
