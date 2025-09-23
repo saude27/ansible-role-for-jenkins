@@ -1,42 +1,49 @@
 ---
-    - name: Update yum package cache
-      yum:
-        update_cache: yes
+- name: Update package cache
+  package:
+    update_cache: yes
 
-    - name: Install Python3 and pip
-      yum:
-        name:
-          - python3
-          - python3-pip
-        state: present
+- name: Install Python3 and pip
+  package:
+    name:
+      - python3
+      - python3-pip
+    state: present
 
-    - name: Install virtualenv
-      pip:
-        name: virtualenv
-        executable: pip3
+- name: Install virtualenv using pip3
+  pip:
+    name: virtualenv
+    executable: pip3
 
-    - name: Install Git
-      yum:
-        name: git
-        state: present
+- name: Install Git
+  package:
+    name: git
+    state: present
 
-    - name: Install PostgreSQL on Amazon Linux
-      yum:
-        name:
-          - postgresql
-          - postgresql-server
-          - postgresql-contrib
-          - postgresql-devel
-        state: present
+# PostgreSQL installation
+- name: Install PostgreSQL packages (cross-platform)
+  package:
+    name: "{{ postgresql_packages }}"
+    state: present
+  vars:
+    postgresql_packages: >
+      {% if ansible_os_family == 'Debian' %}
+        postgresql, postgresql-contrib, libpq-dev
+      {% else %}
+        postgresql, postgresql-server, postgresql-contrib, postgresql-devel
+      {% endif %}
 
-    - name: Initialize PostgreSQL database
-      command: postgresql-setup initdb
-      args:
-        creates: /var/lib/pgsql/data/PG_VERSION
+# Initialize database (Amazon Linux)
+- name: Initialize PostgreSQL database (Amazon Linux only)
+  command: postgresql-setup initdb
+  args:
+    creates: /var/lib/pgsql/data/PG_VERSION
+  when: ansible_os_family == 'RedHat'
 
-    - name: Ensure PostgreSQL service is started and enabled
-      systemd:
-        name: postgresql
-        state: started
-        enabled: yes
-...
+# Ensure PostgreSQL is running
+- name: Ensure PostgreSQL service is running
+  service:
+    name: postgresql
+    state: started
+    enabled: yes
+
