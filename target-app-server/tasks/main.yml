@@ -20,15 +20,21 @@
         name: git
         state: present
 
-    - name: Install PostgreSQL
+    - name: Install PostgreSQL on Amazon Linux
       yum:
         name:
           - postgresql
+          - postgresql-server
           - postgresql-contrib
-          - libpq-dev
-        state: present
+          - postgresql-devel
+      state: present
 
-    - name: Ensure PostgreSQL service is running
+    - name: Initialize PostgreSQL database (only on Amazon Linux 2)
+      command: "postgresql-setup initdb"
+      args:
+      creates: /var/lib/pgsql/data/PG_VERSION
+
+    - name: Ensure PostgreSQL service is started and enabled
       systemd:
         name: postgresql
         state: started
