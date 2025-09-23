@@ -27,16 +27,16 @@
           - postgresql-server
           - postgresql-contrib
           - postgresql-devel
-      state: present
+        state: present
 
     - name: Initialize PostgreSQL database (only on Amazon Linux 2)
-      command: "postgresql-setup initdb"
+      command: postgresql-setup initdb
       args:
-      creates: /var/lib/pgsql/data/PG_VERSION
+        creates: /var/lib/pgsql/data/PG_VERSION
 
     - name: Ensure PostgreSQL service is started and enabled
       systemd:
         name: postgresql
         state: started
-        enabled: yes
+        enabled: yes    
 ...
