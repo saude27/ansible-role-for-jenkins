@@ -41,7 +41,7 @@
   when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
 
 - name: Initialize PostgreSQL 15 database (Amazon Linux 2023)
-  command: "/usr/pgsql-15/bin/postgresql-15-setup initdb"
+  command: "/usr/bin/postgresql-setup --initdb"
   args:
     creates: /var/lib/pgsql/15/data/PG_VERSION
   when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
