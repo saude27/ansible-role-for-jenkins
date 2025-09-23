@@ -1,6 +1,6 @@
 ---
-    - name: Update APT package cache
-      apt:
+    - name: Update yum package cache
+      yum:
         update_cache: yes
 
     - name: Install Python3 and pip
