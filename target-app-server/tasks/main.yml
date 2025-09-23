@@ -1,5 +1,4 @@
 ---
-# Update package cache
 - name: Update package cache
   package:
     update_cache: yes
@@ -16,54 +15,41 @@
     name: virtualenv
     executable: pip3
 
-
 - name: Install Git
   package:
     name: git
     state: present
 
-
-
-
-
-
-- name: Enable PostgreSQL module on Amazon Linux 2023
-  ansible.builtin.command: "dnf module enable -y postgresql:{{ postgres_version }}"
+- name: Add PostgreSQL PGDG repository (Amazon Linux 2023)
+  ansible.builtin.yum_repository:
+    name: pgdg
+    description: "PostgreSQL RPM Repository"
+    baseurl: https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/
+    gpgcheck: yes
+    gpgkey: https://download.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG
+    enabled: yes
   when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
 
-
-- name: Install PostgreSQL packages on Amazon Linux 2023
+- name: Install PostgreSQL 15 packages (Amazon Linux 2023)
   dnf:
     name:
-      - postgresql
-      - postgresql-server
-      - postgresql-contrib
-      - postgresql-devel
+      - postgresql15
+      - postgresql15-server
+      - postgresql15-contrib
+      - postgresql15-devel
     state: present
   when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
 
-# Install PostgreSQL (Amazon Linux 2 / RHEL / CentOS)
-- name: Install PostgreSQL packages on Amazon Linux 2 / RHEL / CentOS
-  yum:
-    name:
-      - postgresql
-      - postgresql-server
-      - postgresql-contrib
-      - postgresql-devel
-    state: present
-  when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2"
-
-# Initialize PostgreSQL database (Amazon Linux)
-- name: Initialize PostgreSQL database (Amazon Linux)
-  command: "/usr/bin/postgresql-setup --initdb"
+- name: Initialize PostgreSQL 15 database (Amazon Linux 2023)
+  command: "/usr/pgsql-15/bin/postgresql-15-setup initdb"
   args:
-    creates: /var/lib/pgsql/data/PG_VERSION
-  when: ansible_distribution == "Amazon"
+    creates: /var/lib/pgsql/15/data/PG_VERSION
+  when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
 
-# Ensure PostgreSQL service is running
-- name: Ensure PostgreSQL is running and enabled
+- name: Ensure PostgreSQL 15 service is running (Amazon Linux 2023)
   service:
-    name: postgresql
+    name: postgresql-15
     state: started
     enabled: yes
-
+  when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
+...

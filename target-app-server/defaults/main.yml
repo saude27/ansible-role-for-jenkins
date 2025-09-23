@@ -1,3 +1,4 @@
-postgres_version: 14
+postgres_version_amazon: 15
 python_version: 3
+
 
