@@ -1,0 +1,36 @@
+---
+    - name: Update APT package cache
+      apt:
+        update_cache: yes
+
+    - name: Install Python3 and pip
+      yum:
+        name:
+          - python3
+          - python3-pip
+        state: present
+
+    - name: Install virtualenv
+      pip:
+        name: virtualenv
+        executable: pip3
+
+    - name: Install Git
+      yum:
+        name: git
+        state: present
+
+    - name: Install PostgreSQL
+      yum:
+        name:
+          - postgresql
+          - postgresql-contrib
+          - libpq-dev
+        state: present
+
+    - name: Ensure PostgreSQL service is running
+      systemd:
+        name: postgresql
+        state: started
+        enabled: yes
+...
